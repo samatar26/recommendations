@@ -5,5 +5,5 @@ app = FastAPI()
 
 
 @app.get("/")
-def home() -> str:
+def home() -> str
     return "Hello world!"
