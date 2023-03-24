@@ -4,9 +4,23 @@ orbs:
 
 jobs:
   checks:
-    executor: python/default
+    executor: 
+      name: python/default
+      tag: "3.10.8"
     steps:
       - checkout
+      - python/install-packages:
+          args: --dev
+          pkg-manager: pipenv
+      - run:
+          name: Run lint-check
+          command: pipenv run lint-check
+      - run: 
+          name: Run format-check
+          command: pipenv run format-check
+      - run:
+          name: Run tests
+          command: pipenv run pytest
 
 workflows:
   build:
