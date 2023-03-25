@@ -9,7 +9,22 @@ jobs:
       tag: "3.10.8"
     steps:
       - checkout
+      - run:
+          name: Start PostgreSQL service
+          command: |
+            docker run -d \
+              -p 5432:5432 \
+              -e POSTGRES_USER=test \
+              -e POSTGRES_PASSWORD=test \
+              -e POSTGRES_DB=test \
+              circleci/postgres:13-alpine
+          background: true
+      - run:
+          name: Wait for PostgreSQL to start
+          command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - python/install-packages:
+        environment:
+          DATABASE_URL: postgresql://test:test@localhost:5432/postgres
           args: --dev
           pkg-manager: pipenv
       - run:
