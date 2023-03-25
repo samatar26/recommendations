@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir pipenv
 RUN pipenv install --deploy --ignore-pipfile
 
 COPY recommendations_api ./recommendations_api
+COPY models ./models
 
 EXPOSE 8000
 
