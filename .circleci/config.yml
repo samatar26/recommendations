@@ -1,23 +1,35 @@
 version: 2.1
-orbs:
-  python: circleci/python@2.0.3
 
 jobs:
   checks:
-    executor: 
-      name: python/default
-      tag: "3.10.8"
+    docker: 
+      - image: cimg/python:3.10
+        environment:
+          DATABASE_URL: postgresql://test:test@localhost:5432/postgres
+      - image: cimg/postgres:15.2
+        environment:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
     steps:
       - checkout
-      - python/install-packages:
-          args: --dev
-          pkg-manager: pipenv
+      - run:
+          name: Install pipenv
+          command: |
+            pip install pipenv
+      - run:
+          name: Install dependencies
+          command: |
+            pipenv install --dev
       - run:
           name: Run lint-check
           command: pipenv run lint-check
       - run: 
           name: Run format-check
           command: pipenv run format-check
+      - run:
+          name: Migrate test db
+          command: pipenv run alembic upgrade head
       - run:
           name: Run tests
           command: pipenv run pytest
