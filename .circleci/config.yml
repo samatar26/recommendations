@@ -4,8 +4,10 @@ jobs:
   plan:
     docker:
       - image: hashicorp/terraform:1.4.2
+    working_directory: ~/recommendations/terraform
     steps:
-      - checkout
+      - checkout:
+          path: ~/recommendations
       - run:
           name: terraform fmt
           command: |
@@ -21,6 +23,7 @@ jobs:
   apply:
     docker:
       - image: hashicorp/terraform:1.4.2
+    working_directory: /home/circleci/my-app
     steps:
       - checkout
       - attach_workspace:
