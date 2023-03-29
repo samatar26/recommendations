@@ -1,6 +1,33 @@
 version: 2.1
 
 jobs:
+  plan:
+    docker:
+      - image: hashicorp/terraform:1.4.2
+    steps:
+      - checkout
+      - run:
+          name: terraform fmt
+          command: |
+            terraform init
+            terraform fmt
+      - run:
+          name: terraform plan
+          command: terraform plan -out plan
+      - persist_to_workspace:
+          root: ~/project
+          paths:
+            - ./
+  apply:
+    docker:
+      - image: hashicorp/terraform:1.4.2
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: terraform apply
+          command: terraform apply -auto-approve
   checks:
     docker: 
       - image: cimg/python:3.10
@@ -35,6 +62,22 @@ jobs:
           command: pipenv run pytest
 
 workflows:
+  terraform:
+    jobs:
+      - plan
+      - review_plan:
+          requires:
+            - plan
+          type: approval
+          filters:
+            branches:
+              ignore: master
+      - apply:
+          requires:
+            - plan
+          filters:
+            branches:
+              only: master
   build:
     jobs:
       - checks
