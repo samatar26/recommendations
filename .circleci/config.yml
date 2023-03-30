@@ -1,6 +1,36 @@
 version: 2.1
 
 jobs:
+  plan:
+    docker:
+      - image: hashicorp/terraform:1.4.2
+    working_directory: ~/recommendations/terraform
+    steps:
+      - checkout:
+          path: ~/recommendations
+      - run:
+          name: terraform fmt
+          command: |
+            terraform init
+            terraform fmt
+      - run:
+          name: terraform plan
+          command: terraform plan -out plan
+      - persist_to_workspace:
+          root: .
+          paths:
+            - .
+  apply:
+    docker:
+      - image: hashicorp/terraform:1.4.2
+    working_directory: /home/circleci/my-app
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: terraform apply
+          command: terraform apply -auto-approve
   checks:
     docker: 
       - image: cimg/python:3.10
@@ -35,6 +65,25 @@ jobs:
           command: pipenv run pytest
 
 workflows:
+  terraform:
+    jobs:
+      - plan:
+          context: INFRASTRUCTURE
+      - review_plan:
+          context: INFRASTRUCTURE
+          requires:
+            - plan
+          type: approval
+          filters:
+            branches:
+              ignore: master
+      - apply:
+          context: INFRASTRUCTURE
+          requires:
+            - plan
+          filters:
+            branches:
+              only: master
   build:
     jobs:
       - checks
