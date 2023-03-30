@@ -76,14 +76,14 @@ workflows:
           type: approval
           filters:
             branches:
-              ignore: master
+              ignore: main
       - apply:
           context: INFRASTRUCTURE
           requires:
             - plan
           filters:
             branches:
-              only: master
+              only: main
   build:
     jobs:
       - checks
