@@ -17,9 +17,9 @@ jobs:
           name: terraform plan
           command: terraform plan -out plan
       - persist_to_workspace:
-          root: ~/project
+          root: .
           paths:
-            - ./
+            - .
   apply:
     docker:
       - image: hashicorp/terraform:1.4.2
@@ -67,8 +67,10 @@ jobs:
 workflows:
   terraform:
     jobs:
-      - plan
+      - plan:
+          context: INFRASTRUCTURE
       - review_plan:
+          context: INFRASTRUCTURE
           requires:
             - plan
           type: approval
@@ -76,6 +78,7 @@ workflows:
             branches:
               ignore: master
       - apply:
+          context: INFRASTRUCTURE
           requires:
             - plan
           filters:
