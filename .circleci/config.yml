@@ -1,5 +1,9 @@
 version: 2.1
 
+orbs:
+  aws-ecr: circleci/aws-ecr@8.2.1
+
+
 jobs:
   plan:
     docker:
@@ -84,6 +88,12 @@ workflows:
           filters:
             branches:
               only: main
-  build:
+  build-and-deploy:
     jobs:
       - checks
+      - aws-ecr/build-and-push-image:
+          context: INFRASTRUCTURE
+          requires:
+            - checks
+          repo: recommendations
+          tag: latest
