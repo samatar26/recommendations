@@ -22,4 +22,12 @@ data "aws_ami" "t2_2xlarge" {
 resource "aws_instance" "recommendations" {
   ami           = data.aws_ami.t2_2xlarge.id
   instance_type = "t2.2xlarge"
+  provisioner "remote-exec" {
+    inline = [
+      "sudo yum update -y",
+      "sudo amazon-linux-extras install docker -y",
+      "sudo service docker start",
+      "sudo usermod -a -G docker ec2-user"
+    ]
+  }
 }

@@ -1,5 +1,9 @@
 version: 2.1
 
+orbs:
+  aws-ecr: circleci/aws-ecr@6.1.1
+
+
 jobs:
   plan:
     docker:
@@ -63,7 +67,11 @@ jobs:
       - run:
           name: Run tests
           command: pipenv run pytest
-
+  build-and-deploy:
+    jobs:
+      - aws-ecr/build-and-push-image:
+          repo: recommendations
+          tag: "${CIRCLE_SHA1}"
 workflows:
   terraform:
     jobs:
